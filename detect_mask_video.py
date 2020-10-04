@@ -58,9 +58,17 @@ def detect_and_predict_mask(frame, faceNet, maskNet):
 			# lists
 			faces.append(face)
 			locs.append((startX, startY, endX, endY))
-        # ----------------
-	# Here comes a Code
-	# -------------------
+        # only make a predictions if at least one face was detected
+	if len(faces) > 0:
+		# for faster inference we'll make batch predictions on *all*
+		# faces at the same time rather than one-by-one predictions
+		# in the above `for` loop
+		faces = np.array(faces, dtype="float32")
+		preds = maskNet.predict(faces, batch_size=32)
+
+	# return a 2-tuple of the face locations and their corresponding
+	# locations
+	return (locs, preds)
 
 # load our serialized face detector model from disk
 prototxtPath = r"face_detector\deploy.prototxt"
@@ -92,9 +100,10 @@ while True:
 		(startX, startY, endX, endY) = box
 		(mask, withoutMask) = pred
 
-		# --------
-		# Here Comes Another Function
-		#-----------
+		# determine the class label and color we'll use to draw
+		# the bounding box and text
+		label = "Mask" if mask > withoutMask else "No Mask"
+		color = (0, 255, 0) if label == "Mask" else (0, 0, 255)
 
 		# include the probability in the label
 		label = "{}: {:.2f}%".format(label, max(mask, withoutMask) * 100)

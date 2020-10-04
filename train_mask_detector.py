@@ -106,9 +106,9 @@ H = model.fit(
 	validation_steps=len(testX) // BS,
 	epochs=EPOCHS)
 
-# -----
-# Predictions
-#-------
+# make predictions on the testing set
+print("[INFO] evaluating network...")
+predIdxs = model.predict(testX, batch_size=BS)
 
 # for each image in the testing set we need to find the index of the
 # label with corresponding largest predicted probability
